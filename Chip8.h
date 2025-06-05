@@ -35,10 +35,10 @@ private:
 
 	
 
-	unsigned short I; //index register
-	unsigned short pc; //program counter
+	uint16_t I; //index register
+	uint16_t pc; //program counter
 
-	unsigned char V[16]; //16 cpu registers
+	uint8_t V[16]; //16 cpu registers
 	unsigned char memory[4096]; //4kb = 4096 bytes memory 
 
 	

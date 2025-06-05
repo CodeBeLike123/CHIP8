@@ -9,14 +9,14 @@ const int WINDOW_HEIGHT = 32 * SCALE;
 int main() {
     Chip8 chip8;
 
-    if (!chip8.LoadRom("C:/Users/ASUS/Downloads/ibm.ch8")) {
+    if (!chip8.LoadRom("C:/Users/ASUS/Downloads/4-flags.ch8")) {
         std::cerr << "ROM failed to load\n";
         return 1;
     }
 
-    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Chip8 Emulator - IBM Logo");
+    sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Chip8 Emulator ");
     sf::RectangleShape pixel(sf::Vector2f(SCALE, SCALE));
-    pixel.setFillColor(sf::Color::White);
+    pixel.setFillColor(sf::Color::Cyan);
 
     sf::Clock clock;
     float timer = 0.f;
