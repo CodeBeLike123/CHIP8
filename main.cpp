@@ -6,36 +6,28 @@ const int SCALE = 10;
 const int WINDOW_WIDTH = 64 * SCALE;
 const int WINDOW_HEIGHT = 32 * SCALE;
 
-void SetKeys(Chip8& chip8, const sf::Event& event) {
-    std::map<sf::Keyboard::Key, int> keymap = {
-    {sf::Keyboard::X, 0x0},
-        {sf::Keyboard::Num1, 0x1},
-        {sf::Keyboard::Num2, 0x2},
-        {sf::Keyboard::Num3, 0x3},
-        {sf::Keyboard::Q, 0x4},
-        {sf::Keyboard::W, 0x5},
-        {sf::Keyboard::E, 0x6},
-        {sf::Keyboard::A, 0x7},
-        {sf::Keyboard::S, 0x8},
-        {sf::Keyboard::D, 0x9},
-        {sf::Keyboard::Z, 0xA},
-        {sf::Keyboard::C, 0xB},
-        {sf::Keyboard::Num4, 0xC},
-        {sf::Keyboard::R, 0xD},
-        {sf::Keyboard::F, 0xE},
-        {sf::Keyboard::V, 0xF},
-    };
-    if (event.type == sf::Event::KeyPressed || event.type == sf::Event::KeyReleased) {
-        bool pressed = (event.type == sf::Event::KeyPressed);
 
-        auto it = keymap.find(event.key.code);
-        if (it != keymap.end()) {
-            chip8.key[it->second] == pressed ? 1 : 0;
-        }
-    }
-}
+std::map<sf::Keyboard::Key, int> keymap = {
+{sf::Keyboard::X, 0x0},
+    {sf::Keyboard::Num1, 0x1},
+    {sf::Keyboard::Num2, 0x2},
+    {sf::Keyboard::Num3, 0x3},
+    {sf::Keyboard::Q, 0x4},
+    {sf::Keyboard::W, 0x5},
+    {sf::Keyboard::E, 0x6},
+    {sf::Keyboard::A, 0x7},
+    {sf::Keyboard::S, 0x8},
+    {sf::Keyboard::D, 0x9},
+    {sf::Keyboard::Z, 0xA},
+    {sf::Keyboard::C, 0xB},
+    {sf::Keyboard::Num4, 0xC},
+    {sf::Keyboard::R, 0xD},
+    {sf::Keyboard::F, 0xE},
+    {sf::Keyboard::V, 0xF}, };
+
 int main() {
     Chip8 chip8;
+    chip8.Initialize();
 
     if (!chip8.LoadRom("C:/Users/ASUS/Downloads/6-keypad.ch8")) {
         std::cerr << "ROM failed to load\n";
@@ -52,10 +44,19 @@ int main() {
 
     while (window.isOpen()) {
         sf::Event e;
+        
         while (window.pollEvent(e)) {
-            if (e.type == sf::Event::Closed)
+            if (e.type == sf::Event::Closed) {
                 window.close();
-            SetKeys(chip8, e);
+            }
+            if (e.type == sf::Event::KeyPressed || e.type == sf::Event::KeyReleased) {
+                bool pressed = (e.type == sf::Event::KeyPressed);
+
+                auto it = keymap.find(e.key.code);
+                if (it != keymap.end()) {
+                    chip8.key[it->second] = pressed ? 1 : 0;
+                }
+            }
         }
         
         chip8.delayTimerCountDown();
