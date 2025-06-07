@@ -24,8 +24,11 @@ public:
 	void EmulateCycle();
 	void ExecuteOpcode(uint16_t opcode);
 
+	void soundTimerCountDown();
+	void delayTimerCountDown();
 	unsigned char screen_pixels[64 * 32]; //
 	bool drawFlag;
+	unsigned char  key[16];
 private:
 	unsigned short  opcode; // 35 opcodes 
 
@@ -45,7 +48,7 @@ private:
 
 	unsigned short stack[16];
 
-	unsigned char  key[16];
+
 
 	uint8_t chip8_fontset[80] = {
   0xF0, 0x90, 0x90, 0x90, 0xF0, // 0

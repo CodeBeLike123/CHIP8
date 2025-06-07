@@ -21,13 +21,17 @@ Chip8::Chip8() {
 Chip8::~Chip8() {
 
 }
-void  Chip8::EmulateCycle(){
+void Chip8::delayTimerCountDown() {
+    if (delay_timer > 0) {
+        delay_timer--;
+    }
+}
+void Chip8::soundTimerCountDown() {
     if (sound_timer > 0) {
         sound_timer--;
     }
-    if (delay_timer > 0 ) {
-        delay_timer--;
-    }
+}
+void  Chip8::EmulateCycle(){
     
     uint16_t opcode = (memory[pc] << 8) | (memory[pc + 1]);
     
@@ -169,9 +173,10 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             int16_t y = (opcode & 0x00F0) >> 4;
 
             int sum = V[x] + V[y];
-            V[0xF] = (sum > 255) ? 1 : 0;
+            uint8_t temp = (sum > 255) ? 1 : 0;
             V[x] = sum & 0xFF;
             
+            V[0xf] = temp;
             break;
         }
         case 0x5:
@@ -180,17 +185,21 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             int16_t y = (opcode & 0x00F0) >> 4;
 
             int diff = V[x] - V[y];
-            V[0xF] = (diff < 0) ? 0 : 1;
+            uint8_t temp = (diff < 0) ? 0 : 1;
             V[x] = diff & 0xFF;
             
+            V[0xF] = temp;
             break;
         }
         case 0x6:
         {
             int16_t x = (opcode & 0x0F00) >> 8;
-            V[0xF] = V[x] & 0x1; //store the  LS bit to V[f]
+            uint8_t temp = V[x] & 0x1; //store the  LS bit to V[f]
             V[x] >>= 1; //shift right 1 bit
+
+            V[0xF] = temp;
             
+            cout << V[15] << " THIS IS V[0XF]";
             break;
 
         }
@@ -200,24 +209,26 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             int16_t y = (opcode & 0x00F0) >> 4;
 
             int diff = V[y] - V[x];
-            V[0xF] = (diff < 0) ? 0 : 1;
+            uint8_t temp = (diff < 0) ? 0 : 1;
             V[x] = diff & 0xFF;
             
+            V[0xF] = temp;
             break;
         }
         case 0xE: 
         {   
             int16_t x = (opcode & 0x0F00) >> 8;
-            V[0xF] = V[x] & 0x80; //store the  MS bit to V[f]
+            uint8_t temp = (V[x] & 0x80)>>7;   //store the  MS bit to V[f]
             V[x] <<= 1; //shift left 1 bit
             
+            V[0xF] =temp;
             break;
 
         }
         break;
 
         }
-
+        break;
     }
     case 0x9000://9XY0
     {
@@ -260,7 +271,7 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
         int y_register = (opcode & 0x00F0) >> 4;  //VY
         int height = opcode & 0x000F;
         int  width = 8; //default chip8 sprite width =  8 pixel 
-        V[0x0F] = 0;
+        V[0xF] = 0;
 
         int x = V[x_register] % 64;
         int y = V[y_register] % 32;
@@ -272,9 +283,8 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
                     int index = ((x + j) + ((y + i) * 64)) % 2048;
                     if (screen_pixels[index] == 1)
                     {
-                        V[0x0F] = 1;
+                        V[0xF] = 1;
                     }
-
                     screen_pixels[index] ^= 1;
                 }
             }
@@ -283,6 +293,29 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
         drawFlag = true;
         break;
 
+    }
+    case 0xE000:
+    {
+        switch (opcode & 0x00FF) {
+        case 0x9E:
+        {
+            x = (opcode & 0x0F00) >> 8;
+            if (key[V[x]] != 0) {
+                pc += 2;
+            }
+            break;
+        }
+        case 0xA1:
+        {
+            x = (opcode & 0x0F00) >> 8;
+            if (key[V[x]] == 0) {
+                pc += 2;
+            }
+            break;
+        }
+            break;
+        }
+        break;
     }
     case 0xF000:
     {
@@ -300,16 +333,16 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             x = (opcode & 0x0F00) >> 8;
             bool key_pressed = false; 
 
-            for (int i = 0; i < 16; i++) {
-                if (key[i] != 0) {
-                    key_pressed = true;
+            for (unsigned int i = 0; i < 16; ++i) {
+                if (key[i]) {
                     V[x] = i;
+                    key_pressed = true;
                     break;
                 }
             }
 
-            if (key_pressed) {
-                
+            if (!key_pressed) {
+                pc -= 2;
             }
 
             break;
@@ -362,7 +395,7 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             for (int i = 0; i <= x; ++i) {
                 memory[I + i] = V[i];
             }
-            // pc tăng sau khi thực hiện
+            
             
             break;
         }
@@ -374,16 +407,11 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             
             break;
         }
-        
-        default:
-            std::cout << "Unknown Fx opcode: " << std::hex << opcode << "\n";
-            
+                 break;
         }
         break;
     }
-        default:
-            std::cout << "Unknown opcode: 0x" << std::hex << opcode << std::endl;
-            
+    
             break;
     }
 }
@@ -436,7 +464,7 @@ bool Chip8::LoadRom(const char* filename) {
     for (int i = 0; i < size; ++i) {
         memory[0x200 + i] = static_cast<uint8_t>(buffer[i]);
     }
-    printf("Opcode at 0x3DC: %02X%02X\n", memory[0x3DC], memory[0x3DC + 1]);
+    
 
     return true;
 
