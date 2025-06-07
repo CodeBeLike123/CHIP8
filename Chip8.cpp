@@ -331,10 +331,12 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
         case 0x0A:
         {
             x = (opcode & 0x0F00) >> 8;
+            std::cout << "Waiting for key press...\n";
             bool key_pressed = false; 
 
             for (unsigned int i = 0; i < 16; ++i) {
                 if (key[i]) {
+                    std::cout << "Detected key[" << i << "] = 1\n";
                     V[x] = i;
                     key_pressed = true;
                     break;

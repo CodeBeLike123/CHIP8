@@ -28,7 +28,7 @@ public:
 	void delayTimerCountDown();
 	unsigned char screen_pixels[64 * 32]; //
 	bool drawFlag;
-	unsigned char  key[16];
+	bool   key[16];
 private:
 	unsigned short  opcode; // 35 opcodes 
 
