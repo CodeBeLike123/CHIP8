@@ -29,6 +29,9 @@ public:
 	unsigned char screen_pixels[64 * 32]; //
 	bool drawFlag;
 	bool   key[16];
+	bool prev_key[16];
+	bool key_pressed = false;
+	bool key_released = false;
 private:
 	unsigned short  opcode; // 35 opcodes 
 

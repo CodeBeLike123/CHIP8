@@ -1,0 +1,10 @@
+﻿  Chip8.cpp
+  main.cpp
+C:\Users\ASUS\source\repos\Chip8_Interpreter\main.cpp(33,38): warning C4805: '==': unsafe mix of type 'unsigned char' and type 'bool' in operation
+C:\Users\ASUS\source\repos\Chip8_Interpreter\main.cpp(76,56): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\ASUS\source\repos\Chip8_Interpreter\main.cpp(76,45): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 283 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  Chip8_Interpreter.vcxproj -> C:\Users\ASUS\source\repos\Chip8_Interpreter\x64\Release\Chip8_Interpreter.exe

@@ -1,4 +1,3 @@
-﻿#include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Chip8.h"
 
@@ -30,12 +29,12 @@ int main() {
     chip8.Initialize();
 
     const float frameTime = 1.0f / 60.0f;
-    const int cylesPerFrame = 10;
+    const int cylesPerFrame = 2;
 
     sf::Clock dtClock;
     float timeAccumulator = 0.0f;
 
-    if (!chip8.LoadRom("C:/Users/ASUS/Downloads/tetris.rom")) {
+    if (!chip8.LoadRom("C:/Users/ASUS/Downloads/tank.rom")) {
         std::cerr << "ROM failed to load\n";
         return 1;
     }
@@ -43,53 +42,62 @@ int main() {
     sf::RenderWindow window(sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT), "Chip8 Emulator ");
     sf::RectangleShape pixel(sf::Vector2f(SCALE, SCALE));
     pixel.setFillColor(sf::Color(173, 255, 255));
-
+  
     sf::Clock clock;
     float timer = 0.f;
     const float cycleDelay = 1.0f / 60.0f;  // 60Hz 
 
     while (window.isOpen()) {
         sf::Event e;
+        
         while (window.pollEvent(e)) {
-            if (e.type == sf::Event::Closed)
+            if (e.type == sf::Event::Closed) {
                 window.close();
-            if (e.type == sf::Event::KeyPressed && keymap.count(e.key.code))
-                chip8.key[keymap[e.key.code]] = true;
-            else if (e.type == sf::Event::KeyReleased && keymap.count(e.key.code)) {
-                chip8.key[keymap[e.key.code]] = false;
-                chip8.key_released = true;
+            }
+            if (e.type == sf::Event::KeyPressed) {
+                if (keymap.count(e.key.code)) {
+                    chip8.key[keymap[e.key.code]] = true;
+                    cout << "key pressed" << endl;
+                }
+            }
+            else if (e.type == sf::Event::KeyReleased) {
+                if (keymap.count(e.key.code)) {
+                    chip8.key[keymap[e.key.code]] = false;
+                    chip8.key_released = true;
+                    cout << "key released" << endl;
+                }
             }
         }
-
-        float dt = dtClock.restart().asSeconds();
-        timeAccumulator += dt;
-
+        
+        float delay_timer = dtClock.restart().asSeconds();
+        timeAccumulator += delay_timer;
         while (timeAccumulator >= frameTime) {
             for (int i = 0; i < cylesPerFrame; ++i) {
                 chip8.EmulateCycle();
             }
-
+        if (timeAccumulator >= 1.0f / 60.0f) {
             chip8.delayTimerCountDown();
             chip8.soundTimerCountDown();
+            timeAccumulator -= 1.0f / 60.0f;
+        
+        }
 
-            timeAccumulator -= frameTime;
+        if (chip8.drawFlag) {
+            window.clear(sf::Color(32, 42, 48, 0));
 
-            // Vẽ màn hình ở đây để giới hạn theo 60Hz
-            if (chip8.drawFlag) {
-                window.clear(sf::Color(32, 42, 48));
-
-                for (int y = 0; y < 32; ++y) {
-                    for (int x = 0; x < 64; ++x) {
-                        if (chip8.screen_pixels[y * 64 + x]) {
-                            pixel.setPosition(x * SCALE, y * SCALE);
-                            window.draw(pixel);
-                        }
+            for (int y = 0; y < 32; ++y) {
+                for (int x = 0; x < 64; ++x) {
+                    if (chip8.screen_pixels[y * 64 + x]) {
+                        pixel.setPosition(x * SCALE, y * SCALE);
+                        window.draw(pixel);
                     }
                 }
-
-                window.display();
-                chip8.drawFlag = false;
             }
+
+            window.display();
+            chip8.drawFlag = false;
         }
     }
+
+    return 0;
 }

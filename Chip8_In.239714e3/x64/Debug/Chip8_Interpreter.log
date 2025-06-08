@@ -1,0 +1,4 @@
+﻿  main.cpp
+C:\Users\ASUS\source\repos\Chip8_Interpreter\main.cpp(84,60): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+C:\Users\ASUS\source\repos\Chip8_Interpreter\main.cpp(84,49): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data
+  Chip8_Interpreter.vcxproj -> C:\Users\ASUS\source\repos\Chip8_Interpreter\x64\Debug\Chip8_Interpreter.exe

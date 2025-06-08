@@ -27,7 +27,7 @@ void Chip8::delayTimerCountDown() {
     }
 }
 void Chip8::soundTimerCountDown() {
-    if (sound_timer > 0) {
+    if (sound_timer >0) {
         sound_timer--;
     }
 }
@@ -148,6 +148,8 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             int8_t x = (opcode & 0x0F00) >> 8;
             int8_t y = (opcode & 0x00F0) >> 4;
             V[x] |= V[y];
+
+            V[0xF] = 0;//reset flagc
             
             break;
         }
@@ -156,7 +158,9 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             int8_t x = (opcode & 0x0F00) >> 8;
             int8_t y = (opcode & 0x00F0) >> 4;
             V[x] &= V[y];
-            
+
+            V[0xF] = 0;//reset flag
+
             break;
         }
         case 0x3: //8xy3
@@ -164,10 +168,13 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             int8_t x = (opcode & 0x0F00) >> 8;
             int8_t y = (opcode & 0x00F0) >> 4;
             V[x] ^= V[y];
+
+            V[0xF] = 0;//reset flag
+
             
             break;
         }
-        case 0x4: 
+        case 0x4: //8xy4
         {
             int16_t x = (opcode & 0x0F00) >> 8;
             int16_t y = (opcode & 0x00F0) >> 4;
@@ -179,7 +186,7 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             V[0xf] = temp;
             break;
         }
-        case 0x5:
+        case 0x5: //8xy5
         {
             int16_t x = (opcode & 0x0F00) >> 8;
             int16_t y = (opcode & 0x00F0) >> 4;
@@ -191,19 +198,23 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             V[0xF] = temp;
             break;
         }
-        case 0x6:
+        case 0x6: //8xy6
         {
             int16_t x = (opcode & 0x0F00) >> 8;
+            int16_t y = (opcode & 0x00F0) >> 4;
+
             uint8_t temp = V[x] & 0x1; //store the  LS bit to V[f]
+            V[x] = V[y];
             V[x] >>= 1; //shift right 1 bit
+
+
 
             V[0xF] = temp;
             
-            cout << V[15] << " THIS IS V[0XF]";
             break;
 
         }
-        case 0x7:
+        case 0x7: //8xy7
         {
             int16_t x = (opcode & 0x0F00) >> 8;
             int16_t y = (opcode & 0x00F0) >> 4;
@@ -215,10 +226,14 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             V[0xF] = temp;
             break;
         }
-        case 0xE: 
+        case 0xE: //8xyE
         {   
             int16_t x = (opcode & 0x0F00) >> 8;
+            uint16_t y = (opcode & 0x00F0) >> 4;
             uint8_t temp = (V[x] & 0x80)>>7;   //store the  MS bit to V[f]
+
+
+            V[x] = V[y];
             V[x] <<= 1; //shift left 1 bit
             
             V[0xF] =temp;
@@ -271,10 +286,11 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
         int y_register = (opcode & 0x00F0) >> 4;  //VY
         int height = opcode & 0x000F;
         int  width = 8; //default chip8 sprite width =  8 pixel 
-        V[0xF] = 0;
 
         int x = V[x_register] % 64;
         int y = V[y_register] % 32;
+
+        V[0xF] = 0;
 
         for (int i = 0; i < height; i++) {
             int  pixel = memory[I + i];
@@ -308,7 +324,7 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
         case 0xA1:
         {
             x = (opcode & 0x0F00) >> 8;
-            if (key[V[x]] == 0) {
+            if (key[V[x]] == 0 ) {
                 pc += 2;
             }
             break;
@@ -338,6 +354,7 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
                 if (key[i]) {
                     std::cout << "Detected key[" << i << "] = 1\n";
                     V[x] = i;
+                    key[i] = false;
                     key_pressed = true;
                     break;
                 }
@@ -397,7 +414,7 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             for (int i = 0; i <= x; ++i) {
                 memory[I + i] = V[i];
             }
-            
+            I += x + 1;
             
             break;
         }
@@ -406,7 +423,7 @@ void Chip8::ExecuteOpcode(uint16_t opcode) {
             for (int i = 0; i <= x; ++i) {
                 V[i] = memory[I + i];
             }
-            
+            I += x + 1;
             break;
         }
                  break;
